@@ -1,0 +1,195 @@
+@model IEnumerable<WEB_BanAccGame.Models.GameAccount>
+@{
+    ViewData["Title"] = "Quản lý sản phẩm";
+    var categories = ViewBag.Categories as SelectList;
+    var currentPage = ViewBag.CurrentPage ?? 1;
+    var totalPages = ViewBag.TotalPages ?? 1;
+    var searchString = ViewBag.SearchString as string;
+    var categoryId = ViewBag.CategoryId as int?;
+}
+
+<div class="container-fluid mt-4">
+    <div class="row mb-4">
+        <div class="col">
+            <h1 class="h2"><i class="bi bi-box-seam"></i> Quản lý sản phẩm</h1>
+            <p class="text-muted">Quản lý tất cả sản phẩm trong hệ thống</p>
+        </div>
+        <div class="col-auto">
+            <a asp-action="CreateProduct" class="btn btn-primary">
+                <i class="bi bi-plus-circle"></i> Thêm sản phẩm mới
+            </a>
+        </div>
+    </div>
+
+    <!-- Filters -->
+    <div class="card border-0 shadow-sm mb-4">
+        <div class="card-body">
+            <form method="get" class="row g-3">
+                <div class="col-md-4">
+                    <label class="form-label">Tìm kiếm</label>
+                    <input type="text" name="searchString" value="@searchString" class="form-control" placeholder="Nhập tên sản phẩm...">
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">Danh mục</label>
+                    <select name="categoryId" asp-items="categories" class="form-select">
+                        <option value="">-- Tất cả --</option>
+                    </select>
+                </div>
+                <div class="col-md-2 d-flex align-items-end">
+                    <button type="submit" class="btn btn-primary w-100">
+                        <i class="bi bi-search"></i> Tìm kiếm
+                    </button>
+                </div>
+                <div class="col-md-2 d-flex align-items-end">
+                    <a asp-action="Products" class="btn btn-secondary w-100">
+                        <i class="bi bi-arrow-clockwise"></i> Làm mới
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Success/Error Messages -->
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            <i class="bi bi-check-circle"></i> @TempData["Success"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="bi bi-x-circle"></i> @TempData["Error"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    <!-- Products Table -->
+    <div class="card border-0 shadow-sm">
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th width="60">ID</th>
+                            <th width="100">Hình ảnh</th>
+                            <th>Tên sản phẩm</th>
+                            <th>Danh mục</th>
+                            <th>Server</th>
+                            <th>Level</th>
+                            <th class="text-end">Giá</th>
+                            <th class="text-center">Trạng thái</th>
+                            <th class="text-center">Ngày tạo</th>
+                            <th width="150" class="text-center">Thao tác</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (Model.Any())
+                        {
+                            @foreach (var item in Model)
+                            {
+                                <tr>
+                                    <td class="align-middle">#@item.Id</td>
+                                    <td class="align-middle">
+                                        <img src="@(item.ImageUrl ?? "https://via.placeholder.com/60x60")" 
+                                             alt="@item.Title" class="img-thumbnail" style="width: 60px; height: 60px; object-fit: cover;">
+                                    </td>
+                                    <td class="align-middle">
+                                        <strong>@item.Title</strong>
+                                        @if (!string.IsNullOrEmpty(item.Description))
+                                        {
+                                            <br>
+                                            <small class="text-muted">@(item.Description.Length > 50 ? item.Description.Substring(0, 50) + "..." : item.Description)</small>
+                                        }
+                                    </td>
+                                    <td class="align-middle">
+                                        <span class="badge bg-secondary">@item.Category?.Name</span>
+                                    </td>
+                                    <td class="align-middle">@(item.Server ?? "-")</td>
+                                    <td class="align-middle">@(item.Level?.ToString() ?? "-")</td>
+                                    <td class="align-middle text-end text-primary fw-bold">@item.Price.ToString("N0") ₫</td>
+                                    <td class="align-middle text-center">
+                                        @if (item.IsAvailable)
+                                        {
+                                            <span class="badge bg-success">Còn hàng</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-danger">Đã bán</span>
+                                        }
+                                    </td>
+                                    <td class="align-middle text-center">
+                                        <small>@item.CreatedDate.ToString("dd/MM/yyyy")</small>
+                                    </td>
+                                    <td class="align-middle text-center">
+                                        <div class="btn-group btn-group-sm" role="group">
+                                            <a asp-action="EditProduct" asp-route-id="@item.Id" class="btn btn-outline-primary" title="Sửa">
+                                                <i class="bi bi-pencil"></i>
+                                            </a>
+                                            <a asp-controller="GameAccounts" asp-action="Details" asp-route-id="@item.Id" 
+                                               class="btn btn-outline-info" title="Xem" target="_blank">
+                                                <i class="bi bi-eye"></i>
+                                            </a>
+                                            <form asp-action="DeleteProduct" asp-route-id="@item.Id" method="post" class="d-inline"
+                                                  onsubmit="return confirm('Bạn có chắc muốn xóa sản phẩm này?');">
+                                                <button type="submit" class="btn btn-outline-danger" title="Xóa">
+                                                    <i class="bi bi-trash"></i>
+                                                </button>
+                                            </form>
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                        }
+                        else
+                        {
+                            <tr>
+                                <td colspan="10" class="text-center py-5">
+                                    <i class="bi bi-inbox display-4 text-muted"></i>
+                                    <p class="mt-3 mb-0">Không tìm thấy sản phẩm nào</p>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Pagination -->
+            @if (totalPages > 1)
+            {
+                <nav aria-label="Page navigation" class="mt-4">
+                    <ul class="pagination justify-content-center">
+                        <li class="page-item @(currentPage == 1 ? "disabled" : "")">
+                            <a class="page-link" asp-action="Products" 
+                               asp-route-page="@(currentPage - 1)" 
+                               asp-route-searchString="@searchString"
+                               asp-route-categoryId="@categoryId">
+                                <i class="bi bi-chevron-left"></i>
+                            </a>
+                        </li>
+                        
+                        @for (int i = 1; i <= totalPages; i++)
+                        {
+                            <li class="page-item @(i == currentPage ? "active" : "")">
+                                <a class="page-link" asp-action="Products" 
+                                   asp-route-page="@i" 
+                                   asp-route-searchString="@searchString"
+                                   asp-route-categoryId="@categoryId">@i</a>
+                            </li>
+                        }
+                        
+                        <li class="page-item @(currentPage == totalPages ? "disabled" : "")">
+                            <a class="page-link" asp-action="Products" 
+                               asp-route-page="@(currentPage + 1)" 
+                               asp-route-searchString="@searchString"
+                               asp-route-categoryId="@categoryId">
+                                <i class="bi bi-chevron-right"></i>
+                            </a>
+                        </li>
+                    </ul>
+                </nav>
+            }
+        </div>
+    </div>
+</div> 

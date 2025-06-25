@@ -1,0 +1,218 @@
+@model WEB_BanAccGame.Models.GameAccount
+@{
+    ViewData["Title"] = Model.Title;
+    var relatedAccounts = ViewBag.RelatedAccounts as List<WEB_BanAccGame.Models.GameAccount>;
+}
+
+<div class="container mt-4">
+<div class="row mb-5">
+    <div class="col-lg-6">
+        <div class="product-images">
+            <div class="main-image-container mb-3 position-relative">
+                <img id="mainImage" 
+                     src="@(Model.ImageUrl ?? "https://via.placeholder.com/600x400/6366f1/ffffff?text=" + Uri.EscapeDataString(Model.Title))" 
+                     class="img-fluid rounded shadow w-100" alt="@Model.Title" 
+                     style="max-height: 500px; object-fit: cover; cursor: zoom-in;"
+                     data-bs-toggle="modal" data-bs-target="#imageModal">
+                <div class="zoom-indicator position-absolute bottom-0 end-0 m-3 bg-dark bg-opacity-75 text-white rounded-pill px-3 py-1">
+                    <i class="bi bi-zoom-in"></i> Click để phóng to
+                </div>
+            </div>
+            <!-- If you have multiple images, you can add thumbnails here -->
+            @* <div class="image-thumbnails d-flex gap-2">
+                <img src="@Model.ImageUrl" class="img-thumbnail active" width="80" height="80" 
+                     onclick="changeMainImage(this)" style="cursor: pointer;">
+            </div> *@
+        </div>
+    </div>
+    
+    <div class="col-lg-6">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a asp-controller="Home" asp-action="Index">Trang chủ</a></li>
+                <li class="breadcrumb-item"><a asp-controller="GameAccounts" asp-action="Index">Tài khoản game</a></li>
+                <li class="breadcrumb-item active" aria-current="page">@Model.Title</li>
+            </ol>
+        </nav>
+        
+        <h1 class="mb-3">@Model.Title</h1>
+        
+        @if (TempData["Success"] != null)
+        {
+            <div class="alert alert-success alert-dismissible fade show" role="alert">
+                <i class="bi bi-check-circle"></i> @TempData["Success"]
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        }
+        @if (TempData["Error"] != null)
+        {
+            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                <i class="bi bi-x-circle"></i> @TempData["Error"]
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        }
+        
+        <div class="mb-3">
+            <span class="badge bg-secondary">@Model.Category?.Name</span>
+            @if (Model.IsAvailable)
+            {
+                <span class="badge bg-success">Còn hàng</span>
+            }
+            else
+            {
+                <span class="badge bg-danger">Đã bán</span>
+            }
+        </div>
+        
+        <div class="mb-4">
+            <h2 class="text-primary mb-3">@Model.Price.ToString("N0") ₫</h2>
+            
+            @if (Model.IsAvailable)
+            {
+                <div class="d-grid gap-2">
+                    @if (User.Identity?.IsAuthenticated == true)
+                    {
+                        <form asp-action="CompletePurchase" method="post" 
+                              onsubmit="return confirm('Bạn có chắc chắn muốn mua tài khoản này với giá @Model.Price.ToString("N0") ₫?');">
+                            <input type="hidden" name="id" value="@Model.Id" />
+                            <button type="submit" class="btn btn-primary btn-lg w-100">
+                                <i class="bi bi-credit-card"></i> Mua ngay
+                            </button>
+                        </form>
+                    }
+                    else
+                    {
+                        <a asp-area="Identity" asp-page="/Account/Login" 
+                           asp-route-returnUrl="@Url.Action("Details", "GameAccounts", new { id = Model.Id })" 
+                           class="btn btn-primary btn-lg">
+                            <i class="bi bi-box-arrow-in-right"></i> Đăng nhập để mua
+                        </a>
+                    }
+                    <button class="btn btn-outline-primary" onclick="toggleWishlist(@Model.Id, this)">
+                        <i class="bi bi-heart"></i> Yêu thích
+                    </button>
+                </div>
+            }
+            else
+            {
+                <button class="btn btn-secondary btn-lg w-100" disabled>
+                    <i class="bi bi-x-circle"></i> Đã bán
+                </button>
+            }
+        </div>
+        
+        <div class="card mb-3">
+            <div class="card-body">
+                <h5 class="card-title">Thông tin chi tiết</h5>
+                <dl class="row mb-0">
+                    @if (!string.IsNullOrEmpty(Model.Server))
+                    {
+                        <dt class="col-sm-4">Server/Máy chủ:</dt>
+                        <dd class="col-sm-8">@Model.Server</dd>
+                    }
+                    
+                    @if (Model.Level.HasValue)
+                    {
+                        <dt class="col-sm-4">Cấp độ:</dt>
+                        <dd class="col-sm-8">Level @Model.Level</dd>
+                    }
+                    
+                    <dt class="col-sm-4">Ngày đăng:</dt>
+                    <dd class="col-sm-8">@Model.CreatedDate.ToString("dd/MM/yyyy")</dd>
+                </dl>
+            </div>
+        </div>
+        
+        @if (!string.IsNullOrEmpty(Model.Description))
+        {
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Mô tả</h5>
+                    <p class="card-text">@Model.Description</p>
+                </div>
+            </div>
+        }
+    </div>
+</div>
+
+<!-- Related Products -->
+@if (relatedAccounts != null && relatedAccounts.Any())
+{
+    <section class="mt-5">
+        <h3 class="mb-4">Sản phẩm liên quan</h3>
+        <div class="row g-4">
+            @foreach (var account in relatedAccounts)
+            {
+                <div class="col-md-6 col-lg-3">
+                    <div class="card h-100 product-card border-0 shadow-sm">
+                        <div class="position-relative" style="padding-top: 66.67%;">
+                            <img src="@(account.ImageUrl ?? "https://via.placeholder.com/400x267/6366f1/ffffff?text=" + Uri.EscapeDataString(account.Title))" 
+                                 class="position-absolute top-0 start-0 w-100 h-100" 
+                                 style="object-fit: cover;"
+                                 alt="@account.Title">
+                        </div>
+                        <div class="card-body d-flex flex-column">
+                            <h6 class="card-title fw-bold">@account.Title</h6>
+                            <div class="mt-auto">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <span class="h5 mb-0 text-primary fw-bold">@account.Price.ToString("N0") ₫</span>
+                                    <a asp-action="Details" asp-route-id="@account.Id" 
+                                       class="btn btn-sm btn-primary">
+                                        <i class="bi bi-eye"></i> Xem
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    </section>
+}
+</div>
+
+<!-- Image Modal -->
+<div class="modal fade" id="imageModal" tabindex="-1" aria-labelledby="imageModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl modal-dialog-centered">
+        <div class="modal-content bg-transparent border-0">
+            <div class="modal-header border-0">
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body text-center p-0">
+                <img src="@(Model.ImageUrl ?? "https://via.placeholder.com/1200x800/6366f1/ffffff?text=" + Uri.EscapeDataString(Model.Title))" 
+                     class="img-fluid rounded" alt="@Model.Title">
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function() {
+            // updateCartBadge(); // Not needed with direct purchase
+            
+            // Image hover effect
+            $('#mainImage').hover(
+                function() { $(this).addClass('shadow-lg'); },
+                function() { $(this).removeClass('shadow-lg'); }
+            );
+        });
+        
+        // function updateCartBadge() {
+        //     $.get('/ShoppingCart/GetCartItemCount', function(data) {
+        //         if (data.count > 0) {
+        //             $('#cart-badge').text(data.count).show();
+        //         } else {
+        //             $('#cart-badge').hide();
+        //         }
+        //     });
+        // }
+        
+        // Change main image (for multiple images)
+        function changeMainImage(thumb) {
+            $('#mainImage').attr('src', $(thumb).attr('src'));
+            $('.image-thumbnails img').removeClass('active');
+            $(thumb).addClass('active');
+        }
+    </script>
+} 

@@ -1,0 +1,110 @@
+@model WEB_BanAccGame.Models.GameAccount
+@{
+    ViewData["Title"] = "Thêm sản phẩm mới";
+    var categories = ViewBag.Categories as SelectList;
+}
+
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card border-0 shadow">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0"><i class="bi bi-plus-circle"></i> Thêm sản phẩm mới</h4>
+                </div>
+                <div class="card-body">
+                    <form asp-action="CreateProduct" method="post" enctype="multipart/form-data">
+                        <div asp-validation-summary="ModelOnly" class="alert alert-danger"></div>
+                        
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label asp-for="Title" class="form-label"></label>
+                                <input asp-for="Title" class="form-control" placeholder="Nhập tên tài khoản game" />
+                                <span asp-validation-for="Title" class="text-danger"></span>
+                            </div>
+                            
+                            <div class="col-md-6 mb-3">
+                                <label asp-for="CategoryId" class="form-label">Thể loại</label>
+                                <select asp-for="CategoryId" asp-items="categories" class="form-select">
+                                    <option value="">-- Chọn thể loại --</option>
+                                </select>
+                                <span asp-validation-for="CategoryId" class="text-danger"></span>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label asp-for="Description" class="form-label"></label>
+                            <textarea asp-for="Description" class="form-control" rows="4" placeholder="Mô tả chi tiết về tài khoản"></textarea>
+                            <span asp-validation-for="Description" class="text-danger"></span>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-4 mb-3">
+                                <label asp-for="Price" class="form-label"></label>
+                                <div class="input-group">
+                                    <input asp-for="Price" class="form-control" placeholder="0" />
+                                    <span class="input-group-text">₫</span>
+                                </div>
+                                <span asp-validation-for="Price" class="text-danger"></span>
+                            </div>
+                            
+                            <div class="col-md-4 mb-3">
+                                <label asp-for="Server" class="form-label"></label>
+                                <input asp-for="Server" class="form-control" placeholder="VD: Server 1, Asia..." />
+                                <span asp-validation-for="Server" class="text-danger"></span>
+                            </div>
+                            
+                            <div class="col-md-4 mb-3">
+                                <label asp-for="Level" class="form-label"></label>
+                                <input asp-for="Level" class="form-control" type="number" placeholder="VD: 60" />
+                                <span asp-validation-for="Level" class="text-danger"></span>
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                                <label asp-for="Username" class="form-label"></label>
+                <input asp-for="Username" class="form-control" placeholder="Tên đăng nhập game" />
+                <span asp-validation-for="Username" class="text-danger"></span>
+                            </div>
+                            
+                            <div class="col-md-6 mb-3">
+                                                <label asp-for="Password" class="form-label"></label>
+                <input asp-for="Password" class="form-control" placeholder="Mật khẩu game" />
+                <span asp-validation-for="Password" class="text-danger"></span>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="imageFile" class="form-label">Hình ảnh sản phẩm</label>
+                            <input type="file" class="form-control" id="imageFile" name="imageFile" accept="image/*" onchange="previewImage(this, 'imagePreview')">
+                            <small class="text-muted">Chấp nhận: JPG, PNG, GIF (Max: 5MB)</small>
+                            <div class="mt-3">
+                                <img id="imagePreview" src="https://via.placeholder.com/300x200" class="img-thumbnail" style="max-width: 300px;">
+                            </div>
+                        </div>
+                        
+                        <div class="form-check mb-3">
+                            <input asp-for="IsAvailable" class="form-check-input" checked />
+                            <label asp-for="IsAvailable" class="form-check-label"></label>
+                        </div>
+                        
+                        <hr>
+                        
+                        <div class="d-flex justify-content-between">
+                            <a asp-action="Products" class="btn btn-secondary">
+                                <i class="bi bi-arrow-left"></i> Quay lại
+                            </a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="bi bi-save"></i> Lưu sản phẩm
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+} 

@@ -1,0 +1,315 @@
+﻿@model WEB_BanAccGame.ViewModels.HomeViewModel
+@{
+    ViewData["Title"] = "Trang chủ";
+}
+
+<!-- Hero Section with Slider -->
+<section class="hero-section text-white py-5 mb-5">
+    <div class="container">
+        <div class="row align-items-center min-vh-50">
+            <div class="col-lg-6 animate__animated animate__fadeInLeft">
+                <h1 class="display-3 fw-bold mb-4">Shop Acc Game <span class="text-warning">Uy Tín #1</span></h1>
+                <p class="lead mb-4">Chuyên cung cấp các tài khoản game chất lượng với giá tốt nhất thị trường. 
+                    Bảo hành 100%, hỗ trợ 24/7.</p>
+                <div class="d-flex gap-3 flex-wrap">
+                    <a asp-controller="GameAccounts" asp-action="Index" class="btn btn-warning btn-lg">
+                        <i class="bi bi-grid-fill"></i> Khám phá ngay
+                    </a>
+                    <a href="#features" class="btn btn-outline-light btn-lg">
+                        <i class="bi bi-info-circle"></i> Tìm hiểu thêm
+                    </a>
+                </div>
+                
+                <!-- Stats -->
+                <div class="row mt-5">
+                    <div class="col-4 text-center">
+                        <h3 class="fw-bold">10K+</h3>
+                        <p class="mb-0">Khách hàng</p>
+                    </div>
+                    <div class="col-4 text-center">
+                        <h3 class="fw-bold">5K+</h3>
+                        <p class="mb-0">Sản phẩm</p>
+                    </div>
+                    <div class="col-4 text-center">
+                        <h3 class="fw-bold">99%</h3>
+                        <p class="mb-0">Hài lòng</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-6 animate__animated animate__fadeInRight">
+                <div id="heroCarousel" class="carousel slide" data-bs-ride="carousel">
+                    <div class="carousel-inner">
+                        <div class="carousel-item active">
+                            <img src="/images/banner/pubg.jpg" class="d-block w-100 rounded-3" 
+                            alt="PUBG Mobile">
+                        </div>
+                        <div class="carousel-item">
+                            <img src="/images/banner/genshin.jpg" class="d-block w-100 rounded-3" 
+                            alt="Genshin Impact">   
+                        </div>
+                        <div class="carousel-item">
+                            <img src="/images/banner/mobilegend.jpg" class="d-block w-100 rounded-3" 
+                            alt="mobilegend">
+                        </div>
+                        <div class="carousel-item">
+                            <img src="/images/banner/lienquan.jpg" class="d-block w-100 rounded-3" 
+                            alt="Liên Quân Mobile">
+                        </div>
+                    </div>
+                    <button class="carousel-control-prev" type="button" data-bs-target="#heroCarousel" data-bs-slide="prev">
+                        <span class="carousel-control-prev-icon"></span>
+                    </button>
+                    <button class="carousel-control-next" type="button" data-bs-target="#heroCarousel" data-bs-slide="next">
+                        <span class="carousel-control-next-icon"></span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Flash Sale Section -->
+<section class="mb-5 py-4 bg-gradient-danger text-white">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-md-6">
+                <h2 class="mb-0"><i class="bi bi-lightning-fill"></i> Flash Sale</h2>
+                <p class="mb-0">Giảm giá lên đến 50% - Số lượng có hạn!</p>
+            </div>
+            <div class="col-md-6 text-md-end">
+                <div class="d-inline-block">
+                    <p class="mb-0">Kết thúc sau:</p>
+                    <h3 class="mb-0" id="flashSaleCountdown">Loading...</h3>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Categories Section -->
+<section id="categories" class="mb-5 fade-in">
+    <div class="container">
+        <div class="text-center mb-4">
+            <h2 class="fw-bold">Danh mục game</h2>
+            <p class="text-muted">Chọn thể loại game bạn yêu thích</p>
+        </div>
+        <div class="row g-4">
+            @foreach (var category in Model.Categories)
+            {
+                <div class="col-6 col-md-4 col-lg-2">
+                    <a asp-controller="GameAccounts" asp-action="Category" asp-route-name="@category.Name" 
+                       class="text-decoration-none">
+                        <div class="card h-100 text-center category-card border-0 shadow-sm">
+                            <div class="card-body py-4">
+                                <div class="display-4 mb-3">@category.IconUrl</div>
+                                <h6 class="card-title fw-bold">@category.Name</h6>
+                                <p class="text-muted small mb-0">@category.Description</p>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+            }
+        </div>
+    </div>
+</section>
+
+<!-- Featured Products -->
+<section class="mb-5 fade-in">
+    <div class="container">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <h2 class="fw-bold mb-0">Sản phẩm nổi bật</h2>
+                <p class="text-muted">Được nhiều khách hàng lựa chọn</p>
+            </div>
+            <a asp-controller="GameAccounts" asp-action="Index" class="btn btn-outline-primary">
+                Xem tất cả <i class="bi bi-arrow-right"></i>
+            </a>
+        </div>
+        
+        <div class="row g-4">
+            @foreach (var account in Model.FeaturedAccounts)
+            {
+                <div class="col-md-6 col-lg-3">
+                    <div class="card h-100 product-card border-0 shadow-sm">
+                        <div class="position-relative" style="padding-top: 75%;">
+                            <img src="@(account.ImageUrl ?? "https://via.placeholder.com/400x300/6366f1/ffffff?text=" + Uri.EscapeDataString(account.Title))" 
+                                 class="position-absolute top-0 start-0 w-100 h-100" 
+                                 style="object-fit: cover;"
+                                 alt="@account.Title">
+                            <button class="btn btn-sm btn-light position-absolute top-0 end-0 m-2" 
+                                    onclick="toggleWishlist(@account.Id, this)" title="Thêm vào yêu thích">
+                                <i class="bi bi-heart"></i>
+                            </button>
+                            @if (account.Price > 2000000)
+                            {
+                                <span class="badge bg-danger position-absolute top-0 start-0 m-2">Hot</span>
+                            }
+                        </div>
+                        <div class="card-body d-flex flex-column">
+                            <span class="badge bg-secondary align-self-start mb-2">@account.Category?.Name</span>
+                            <h5 class="card-title fw-bold">@account.Title</h5>
+                            <p class="card-text text-muted small">
+                                @if (account.Level.HasValue)
+                                {
+                                    <span><i class="bi bi-star-fill text-warning"></i> Level @account.Level</span>
+                                }
+                                @if (!string.IsNullOrEmpty(account.Server))
+                                {
+                                    <span class="ms-2"><i class="bi bi-server"></i> @account.Server</span>
+                                }
+                            </p>
+                            <div class="mt-auto">
+                                <div class="d-flex justify-content-between align-items-center mb-3">
+                                    <span class="h4 mb-0 text-primary fw-bold">@account.Price.ToString("N0") ₫</span>
+                                    <div class="rating">
+                                        <i class="bi bi-star-fill text-warning"></i>
+                                        <span class="text-muted small">4.5 (120)</span>
+                                    </div>
+                                </div>
+                                <div class="d-grid gap-2">
+                                    <a asp-controller="GameAccounts" asp-action="Details" asp-route-id="@account.Id" 
+                                       class="btn btn-outline-primary">
+                                        <i class="bi bi-eye"></i> Xem chi tiết
+                                    </a>
+                                    @if (User.Identity?.IsAuthenticated == true)
+                                    {
+                                        <form asp-controller="GameAccounts" asp-action="CompletePurchase" method="post"
+                                              onsubmit="return confirm('Bạn có chắc chắn muốn mua @account.Title với giá @account.Price.ToString("N0") ₫?');">
+                                            <input type="hidden" name="id" value="@account.Id" />
+                                            <button type="submit" class="btn btn-primary w-100">
+                                                <i class="bi bi-credit-card"></i> Mua ngay
+                                            </button>
+                                        </form>
+                                    }
+                                    else
+                                    {
+                                        <a asp-area="Identity" asp-page="/Account/Login" 
+                                           asp-route-returnUrl="@Url.Action("Details", "GameAccounts", new { id = account.Id })"
+                                           class="btn btn-primary w-100">
+                                            <i class="bi bi-box-arrow-in-right"></i> Đăng nhập để mua
+                                        </a>
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+</section>
+
+<!-- Features Section -->
+<section id="features" class="py-5 bg-light fade-in">
+    <div class="container">
+        <div class="text-center mb-5">
+            <h2 class="fw-bold">Tại sao chọn GameStore?</h2>
+            <p class="text-muted">Cam kết mang đến dịch vụ tốt nhất cho khách hàng</p>
+        </div>
+        <div class="row g-4">
+            <div class="col-md-6 col-lg-3 text-center">
+                <div class="feature-icon mb-3">
+                    <i class="bi bi-shield-check display-4 text-primary"></i>
+                </div>
+                <h5 class="fw-bold">Uy tín 100%</h5>
+                <p class="text-muted">Cam kết tài khoản chính chủ, không hack, không lừa đảo</p>
+            </div>
+            <div class="col-md-6 col-lg-3 text-center">
+                <div class="feature-icon mb-3">
+                    <i class="bi bi-lightning-charge display-4 text-warning"></i>
+                </div>
+                <h5 class="fw-bold">Giao dịch nhanh</h5>
+                <p class="text-muted">Nhận tài khoản ngay sau khi thanh toán thành công</p>
+            </div>
+            <div class="col-md-6 col-lg-3 text-center">
+                <div class="feature-icon mb-3">
+                    <i class="bi bi-headset display-4 text-success"></i>
+                </div>
+                <h5 class="fw-bold">Hỗ trợ 24/7</h5>
+                <p class="text-muted">Đội ngũ hỗ trợ luôn sẵn sàng giải đáp mọi thắc mắc</p>
+            </div>
+            <div class="col-md-6 col-lg-3 text-center">
+                <div class="feature-icon mb-3">
+                    <i class="bi bi-cash-coin display-4 text-info"></i>
+                </div>
+                <h5 class="fw-bold">Giá tốt nhất</h5>
+                <p class="text-muted">Cam kết giá rẻ nhất thị trường, hoàn tiền nếu tìm được nơi rẻ hơn</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- New Products -->
+<section class="mb-5 fade-in">
+    <div class="container">
+        <div class="text-center mb-4">
+            <h2 class="fw-bold">Sản phẩm mới</h2>
+            <p class="text-muted">Cập nhật liên tục mỗi ngày</p>
+        </div>
+        <div class="row g-4">
+            @foreach (var account in Model.NewAccounts)
+            {
+                <div class="col-md-6 col-lg-3">
+                    <div class="card h-100 product-card border-0 shadow-sm">
+                        <div class="position-relative" style="padding-top: 75%;">
+                            <img src="@(account.ImageUrl ?? "https://via.placeholder.com/400x300/10b981/ffffff?text=" + Uri.EscapeDataString(account.Title))" 
+                                 class="position-absolute top-0 start-0 w-100 h-100" 
+                                 style="object-fit: cover;"
+                                 alt="@account.Title">
+                            <span class="badge bg-success position-absolute top-0 end-0 m-2">Mới</span>
+                        </div>
+                        <div class="card-body d-flex flex-column">
+                            <span class="badge bg-secondary align-self-start mb-2">@account.Category?.Name</span>
+                            <h5 class="card-title fw-bold">@account.Title</h5>
+                            <p class="text-muted small mb-3">@account.Description?.Substring(0, Math.Min(account.Description.Length, 100))...</p>
+                            <div class="mt-auto">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <span class="h5 mb-0 text-primary fw-bold">@account.Price.ToString("N0") ₫</span>
+                                    <a asp-controller="GameAccounts" asp-action="Details" asp-route-id="@account.Id" 
+                                       class="btn btn-primary">
+                                        Chi tiết <i class="bi bi-arrow-right"></i>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+</section>
+
+<!-- Newsletter Section -->
+<section class="py-5 bg-primary text-white">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-lg-6">
+                <h3 class="fw-bold mb-3">Đăng ký nhận thông tin khuyến mãi</h3>
+                <p>Nhận ngay ưu đãi 10% cho đơn hàng đầu tiên!</p>
+            </div>
+            <div class="col-lg-6">
+                <form class="input-group">
+                    <input type="email" class="form-control form-control-lg" placeholder="Email của bạn...">
+                    <button class="btn btn-warning btn-lg" type="submit">
+                        <i class="bi bi-send"></i> Đăng ký
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</section>
+
+@section Scripts {
+    <script>
+        // Initialize countdown
+        $(document).ready(function() {
+            // Flash sale countdown (24 hours from now)
+            const tomorrow = new Date();
+            tomorrow.setDate(tomorrow.getDate() + 1);
+            startCountdown(tomorrow, 'flashSaleCountdown');
+            
+            // Update cart badge
+            // updateCartBadge(); // Not needed with direct purchase
+        });
+    </script>
+}

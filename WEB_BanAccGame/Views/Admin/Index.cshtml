@@ -1,0 +1,251 @@
+@{
+    ViewData["Title"] = "Admin Dashboard";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+<div class="container-fluid mt-4">
+    <div class="row mb-4">
+        <div class="col">
+            <h1 class="h2"><i class="bi bi-speedometer2"></i> Dashboard</h1>
+            <p class="text-muted">Tổng quan về hệ thống</p>
+        </div>
+    </div>
+
+    <!-- Statistics Cards -->
+    <div class="row g-4 mb-4">
+        <div class="col-md-6 col-lg-3">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="text-uppercase text-muted mb-2">Tổng sản phẩm</h6>
+                            <h2 class="mb-0">@Model.TotalProducts</h2>
+                        </div>
+                        <div class="text-primary">
+                            <i class="bi bi-box-seam display-5"></i>
+                        </div>
+                    </div>
+                    <div class="mt-3">
+                        <a asp-action="Products" class="text-decoration-none">
+                            <small>Xem chi tiết <i class="bi bi-arrow-right"></i></small>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6 col-lg-3">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="text-uppercase text-muted mb-2">Đơn hàng</h6>
+                            <h2 class="mb-0">@Model.TotalOrders</h2>
+                        </div>
+                        <div class="text-success">
+                            <i class="bi bi-cart-check display-5"></i>
+                        </div>
+                    </div>
+                    <div class="mt-3">
+                        <a asp-action="Orders" class="text-decoration-none">
+                            <small>Xem chi tiết <i class="bi bi-arrow-right"></i></small>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6 col-lg-3">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="text-uppercase text-muted mb-2">Người dùng</h6>
+                            <h2 class="mb-0">@Model.TotalUsers</h2>
+                        </div>
+                        <div class="text-info">
+                            <i class="bi bi-people display-5"></i>
+                        </div>
+                    </div>
+                    <div class="mt-3">
+                        <small class="text-success"><i class="bi bi-arrow-up"></i> 12% tháng này</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6 col-lg-3">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="text-uppercase text-muted mb-2">Doanh thu</h6>
+                            <h2 class="mb-0">@Model.Revenue.ToString("N0") ₫</h2>
+                        </div>
+                        <div class="text-warning">
+                            <i class="bi bi-currency-dollar display-5"></i>
+                        </div>
+                    </div>
+                    <div class="mt-3">
+                        <small class="text-success"><i class="bi bi-arrow-up"></i> 23% tháng này</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Admin Quick Actions -->
+    <div class="row mb-4">
+        <div class="col">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-transparent">
+                    <h5 class="mb-0"><i class="bi bi-lightning"></i> Thao tác nhanh</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row g-3">
+                        <div class="col-md-3">
+                            <a asp-action="CreateProduct" class="btn btn-primary w-100">
+                                <i class="bi bi-plus-circle"></i> Thêm sản phẩm
+                            </a>
+                        </div>
+                        <div class="col-md-3">
+                            <a asp-action="Orders" class="btn btn-outline-primary w-100">
+                                <i class="bi bi-receipt"></i> Quản lý đơn hàng
+                            </a>
+                        </div>
+                        <div class="col-md-3">
+                            <a asp-action="Categories" class="btn btn-outline-primary w-100">
+                                <i class="bi bi-tags"></i> Quản lý danh mục
+                            </a>
+                        </div>
+                        <div class="col-md-3">
+                            <a href="#" class="btn btn-outline-primary w-100">
+                                <i class="bi bi-graph-up"></i> Báo cáo
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Recent Orders -->
+        <div class="col-lg-8 mb-4">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-transparent d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0"><i class="bi bi-clock-history"></i> Đơn hàng gần đây</h5>
+                    <a asp-action="Orders" class="btn btn-sm btn-outline-primary">Xem tất cả</a>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Mã đơn</th>
+                                    <th>Khách hàng</th>
+                                    <th>Tổng tiền</th>
+                                    <th>Trạng thái</th>
+                                    <th>Ngày đặt</th>
+                                    <th></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var order in Model.RecentOrders)
+                                {
+                                    <tr>
+                                        <td><code>@order.OrderCode</code></td>
+                                        <td>@order.User?.Email</td>
+                                        <td class="text-primary fw-bold">@order.TotalAmount.ToString("N0") ₫</td>
+                                        <td>
+                                            @switch (order.Status)
+                                            {
+                                                case WEB_BanAccGame.Models.OrderStatus.Pending:
+                                                    <span class="badge bg-warning">Đang chờ</span>
+                                                    break;
+                                                case WEB_BanAccGame.Models.OrderStatus.Paid:
+                                                    <span class="badge bg-info">Đã thanh toán</span>
+                                                    break;
+                                                case WEB_BanAccGame.Models.OrderStatus.Completed:
+                                                    <span class="badge bg-success">Hoàn thành</span>
+                                                    break;
+                                                case WEB_BanAccGame.Models.OrderStatus.Cancelled:
+                                                    <span class="badge bg-danger">Đã hủy</span>
+                                                    break;
+                                            }
+                                        </td>
+                                        <td>@order.OrderDate.ToString("dd/MM/yyyy HH:mm")</td>
+                                        <td>
+                                            <a asp-action="OrderDetails" asp-route-id="@order.Id" class="btn btn-sm btn-outline-primary">
+                                                <i class="bi bi-eye"></i>
+                                            </a>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Top Products -->
+        <div class="col-lg-4 mb-4">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-transparent">
+                    <h5 class="mb-0"><i class="bi bi-star"></i> Sản phẩm giá cao</h5>
+                </div>
+                <div class="card-body">
+                    <div class="list-group list-group-flush">
+                        @foreach (var product in Model.LowStockProducts)
+                        {
+                            <div class="list-group-item px-0">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <h6 class="mb-1">@product.Title</h6>
+                                        <small class="text-muted">@product.Category?.Name</small>
+                                    </div>
+                                    <div class="text-end">
+                                        <div class="text-primary fw-bold">@product.Price.ToString("N0") ₫</div>
+                                        <small class="text-muted">
+                                            @if (product.IsAvailable)
+                                            {
+                                                <span class="text-success">Còn hàng</span>
+                                            }
+                                            else
+                                            {
+                                                <span class="text-danger">Đã bán</span>
+                                            }
+                                        </small>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // Add any dashboard-specific scripts here
+        $(document).ready(function() {
+            // Animate numbers on load
+            $('.card h2').each(function() {
+                var $this = $(this);
+                var target = parseInt($this.text().replace(/[^0-9]/g, ''));
+                $this.prop('Counter', 0).animate({
+                    Counter: target
+                }, {
+                    duration: 1000,
+                    easing: 'swing',
+                    step: function(now) {
+                        $this.text(Math.ceil(now).toLocaleString('vi-VN'));
+                    }
+                });
+            });
+        });
+    </script>
+} 

@@ -1,0 +1,349 @@
+@model WEB_BanAccGame.Models.Order
+@{
+    ViewData["Title"] = $"Chi tiết đơn hàng {Model.OrderCode}";
+}
+
+<div class="container mt-4">
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2><i class="bi bi-receipt"></i> Chi tiết đơn hàng</h2>
+    <a asp-action="Index" class="btn btn-outline-primary">
+        <i class="bi bi-arrow-left"></i> Quay lại
+    </a>
+</div>
+
+<div class="row">
+    <div class="col-lg-8">
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0">Thông tin đơn hàng</h5>
+            </div>
+            <div class="card-body">
+                <dl class="row">
+                    <dt class="col-sm-3">Mã đơn hàng:</dt>
+                    <dd class="col-sm-9"><strong>@Model.OrderCode</strong></dd>
+                    
+                    <dt class="col-sm-3">Ngày đặt:</dt>
+                    <dd class="col-sm-9">@Model.OrderDate.ToString("dd/MM/yyyy HH:mm")</dd>
+                    
+                    <dt class="col-sm-3">Trạng thái:</dt>
+                    <dd class="col-sm-9">
+                        @switch (Model.Status)
+                        {
+                            case WEB_BanAccGame.Models.OrderStatus.Pending:
+                                <span class="badge bg-warning">Đang chờ</span>
+                                break;
+                            case WEB_BanAccGame.Models.OrderStatus.Paid:
+                                <span class="badge bg-info">Đã thanh toán</span>
+                                break;
+                            case WEB_BanAccGame.Models.OrderStatus.Completed:
+                                <span class="badge bg-success">Hoàn thành</span>
+                                break;
+                            case WEB_BanAccGame.Models.OrderStatus.Cancelled:
+                                <span class="badge bg-danger">Đã hủy</span>
+                                break;
+                        }
+                    </dd>
+                    
+                    @if (!string.IsNullOrEmpty(Model.Notes))
+                    {
+                        <dt class="col-sm-3">Ghi chú:</dt>
+                        <dd class="col-sm-9">@Model.Notes</dd>
+                    }
+                </dl>
+            </div>
+        </div>
+        
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">Chi tiết sản phẩm</h5>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Sản phẩm</th>
+                                <th>Thông tin</th>
+                                <th>Số lượng</th>
+                                <th>Đơn giá</th>
+                                <th>Thành tiền</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var detail in Model.OrderDetails)
+                            {
+                                <tr>
+                                    <td>
+                                        <img src="@(detail.GameAccount?.ImageUrl ?? "https://via.placeholder.com/50x50")" 
+                                             width="50" height="50" class="rounded me-2" alt="">
+                                        @detail.GameAccount?.Title
+                                    </td>
+                                    <td>
+                                        @if (Model.Status == WEB_BanAccGame.Models.OrderStatus.Completed)
+                                        {
+                                            <div class="account-info-mini">
+                                                <div class="mb-2">
+                                                    <small class="text-muted d-block">Tài khoản:</small>
+                                                    <div class="input-group input-group-sm">
+                                                        <input type="text" class="form-control" 
+                                                               value="@detail.GameAccount?.Username" readonly>
+                                                        <button class="btn btn-outline-secondary" type="button" 
+                                                                onclick="copyToClipboard('@detail.GameAccount?.Username', this)"
+                                                                title="Copy username">
+                                                            <i class="bi bi-copy"></i>
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                                <div class="mb-2">
+                                                    <small class="text-muted d-block">Mật khẩu:</small>
+                                                    <div class="input-group input-group-sm">
+                                                        <input type="password" class="form-control password-field" 
+                                                               value="@detail.GameAccount?.Password" readonly>
+                                                        <button class="btn btn-outline-secondary toggle-password" type="button"
+                                                                title="Hiện/ẩn mật khẩu">
+                                                            <i class="bi bi-eye"></i>
+                                                        </button>
+                                                        <button class="btn btn-outline-secondary" type="button" 
+                                                                onclick="copyToClipboard('@detail.GameAccount?.Password', this)"
+                                                                title="Copy password">
+                                                            <i class="bi bi-copy"></i>
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                                <a href="#" class="btn btn-sm btn-outline-info view-full-account" 
+                                                   data-account-id="@detail.GameAccount?.Id"
+                                                   data-bs-toggle="modal" data-bs-target="#accountModal">
+                                                    <i class="bi bi-eye"></i> Xem đầy đủ
+                                                </a>
+                                            </div>
+                                        }
+                                        else
+                                        {
+                                            <div class="text-center py-3">
+                                                <i class="bi bi-lock text-muted fs-4"></i>
+                                                <p class="text-muted small mb-0">Thông tin sẽ hiển thị<br>sau khi hoàn thành</p>
+                                            </div>
+                                        }
+                                    </td>
+                                    <td>@detail.Quantity</td>
+                                    <td>@detail.Price.ToString("N0") ₫</td>
+                                    <td>@((detail.Price * detail.Quantity).ToString("N0")) ₫</td>
+                                </tr>
+                            }
+                        </tbody>
+                        <tfoot>
+                            <tr>
+                                <th colspan="4" class="text-end">Tổng cộng:</th>
+                                <th class="text-primary">@Model.TotalAmount.ToString("N0") ₫</th>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-lg-4">
+        @if (Model.Status == WEB_BanAccGame.Models.OrderStatus.Completed)
+        {
+            <div class="alert alert-success">
+                <h6 class="alert-heading"><i class="bi bi-check-circle"></i> Đơn hàng đã hoàn thành!</h6>
+                <p>Thông tin tài khoản đã được hiển thị ở phần chi tiết sản phẩm.</p>
+            </div>
+        }
+        else if (Model.Status == WEB_BanAccGame.Models.OrderStatus.Pending)
+        {
+            <div class="alert alert-warning">
+                <h6 class="alert-heading"><i class="bi bi-clock"></i> Đang chờ xử lý</h6>
+                <p>Đơn hàng của bạn đang được xử lý. Vui lòng thanh toán để nhận thông tin tài khoản.</p>
+            </div>
+        }
+        
+        <div class="card">
+            <div class="card-body">
+                <h6 class="card-title"><i class="bi bi-question-circle"></i> Cần hỗ trợ?</h6>
+                <p class="card-text">Nếu bạn gặp vấn đề với đơn hàng, vui lòng liên hệ:</p>
+                <ul class="list-unstyled mb-0">
+                    <li><i class="bi bi-envelope"></i> support@gamestore.vn</li>
+                    <li><i class="bi bi-telephone"></i> 1900 xxxx</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+</div>
+
+<!-- Account Details Modal -->
+<div class="modal fade" id="accountModal" tabindex="-1" aria-labelledby="accountModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header bg-success text-white">
+                <h5 class="modal-title" id="accountModalLabel">
+                    <i class="bi bi-check-circle"></i> Thông tin tài khoản đã mua
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" id="accountModalBody">
+                <!-- Content will be loaded here -->
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // Copy to clipboard function
+        function copyToClipboard(text, button) {
+            navigator.clipboard.writeText(text).then(function() {
+                // Change icon to checkmark
+                const icon = button.querySelector('i');
+                const originalClass = icon.className;
+                icon.className = 'bi bi-check';
+                button.classList.add('btn-success');
+                button.classList.remove('btn-outline-secondary');
+                
+                // Show toast
+                showToast('success', 'Đã copy vào clipboard!');
+                
+                // Reset after 2 seconds
+                setTimeout(() => {
+                    icon.className = originalClass;
+                    button.classList.remove('btn-success');
+                    button.classList.add('btn-outline-secondary');
+                }, 2000);
+            }).catch(function(err) {
+                console.error('Could not copy text: ', err);
+                showToast('error', 'Không thể copy. Vui lòng copy thủ công.');
+            });
+        }
+        
+        // Toggle password visibility
+        $(document).on('click', '.toggle-password', function() {
+            const passwordField = $(this).siblings('.password-field');
+            const icon = $(this).find('i');
+            
+            if (passwordField.attr('type') === 'password') {
+                passwordField.attr('type', 'text');
+                icon.removeClass('bi-eye').addClass('bi-eye-slash');
+            } else {
+                passwordField.attr('type', 'password');
+                icon.removeClass('bi-eye-slash').addClass('bi-eye');
+            }
+        });
+        
+        // Load account details in modal
+        $(document).on('click', '.view-full-account', function(e) {
+            e.preventDefault();
+            const accountId = $(this).data('account-id');
+            
+            // Find the account data from the current order details
+            const orderDetails = @Html.Raw(Json.Serialize(Model.OrderDetails.Select(od => new {
+                GameAccountId = od.GameAccountId,
+                GameAccount = new {
+                    Id = od.GameAccount?.Id,
+                    Title = od.GameAccount?.Title,
+                    Username = od.GameAccount?.Username,
+                    Password = od.GameAccount?.Password,
+                    Category = new { Name = od.GameAccount?.Category?.Name },
+                    Level = od.GameAccount?.Level,
+                    Server = od.GameAccount?.Server,
+                    ImageUrl = od.GameAccount?.ImageUrl
+                }
+            })));
+            
+            const accountDetail = orderDetails.find(od => od.GameAccount.Id == accountId);
+            
+            if (accountDetail) {
+                const account = accountDetail.GameAccount;
+                const modalBody = $('#accountModalBody');
+                
+                modalBody.html(`
+                    <div class="row">
+                        <div class="col-md-4">
+                            <img src="${account.ImageUrl || 'https://via.placeholder.com/300x200'}" 
+                                 class="img-fluid rounded shadow" alt="${account.Title}">
+                        </div>
+                        <div class="col-md-8">
+                            <h4 class="fw-bold mb-3">${account.Title}</h4>
+                            <div class="mb-3">
+                                <span class="badge bg-secondary">${account.Category?.Name || 'N/A'}</span>
+                                ${account.Level ? '<span class="badge bg-warning ms-2">Level ' + account.Level + '</span>' : ''}
+                                ${account.Server ? '<span class="badge bg-info ms-2">' + account.Server + '</span>' : ''}
+                            </div>
+                            
+                            <div class="credential-box p-4 border rounded bg-light">
+                                <h5 class="mb-3"><i class="bi bi-key"></i> Thông tin đăng nhập</h5>
+                                
+                                <div class="credential-item mb-3">
+                                    <label class="form-label fw-bold text-uppercase">Tên tài khoản</label>
+                                    <div class="input-group">
+                                        <input type="text" class="form-control" value="${account.Username}" readonly>
+                                        <button class="btn btn-outline-primary" type="button" 
+                                                onclick="copyToClipboard('${account.Username}', this)">
+                                            <i class="bi bi-copy"></i> Copy
+                                        </button>
+                                    </div>
+                                </div>
+                                
+                                <div class="credential-item mb-3">
+                                    <label class="form-label fw-bold text-uppercase">Mật khẩu</label>
+                                    <div class="input-group">
+                                        <input type="password" class="form-control password-field" value="${account.Password}" readonly>
+                                        <button class="btn btn-outline-secondary toggle-password" type="button">
+                                            <i class="bi bi-eye"></i>
+                                        </button>
+                                        <button class="btn btn-outline-primary" type="button" 
+                                                onclick="copyToClipboard('${account.Password}', this)">
+                                            <i class="bi bi-copy"></i> Copy
+                                        </button>
+                                    </div>
+                                </div>
+                                
+                                <div class="alert alert-warning mt-3">
+                                    <i class="bi bi-exclamation-triangle"></i>
+                                    <strong>Lưu ý:</strong> Vui lòng đổi mật khẩu ngay sau khi nhận tài khoản để bảo mật.
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `);
+            }
+        });
+        
+        // Toast notification function
+        function showToast(type, message) {
+            const toastHtml = \`
+                <div class="toast align-items-center text-white bg-\${type === 'success' ? 'success' : 'danger'} border-0" role="alert">
+                    <div class="d-flex">
+                        <div class="toast-body">\${message}</div>
+                        <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+                    </div>
+                </div>
+            \`;
+            
+            // Create toast container if it doesn't exist
+            let toastContainer = document.querySelector('.toast-container');
+            if (!toastContainer) {
+                toastContainer = document.createElement('div');
+                toastContainer.className = 'toast-container position-fixed top-0 end-0 p-3';
+                document.body.appendChild(toastContainer);
+            }
+            
+            // Add toast to container
+            toastContainer.insertAdjacentHTML('beforeend', toastHtml);
+            
+            // Show toast
+            const toastElement = toastContainer.lastElementChild;
+            const toast = new bootstrap.Toast(toastElement);
+            toast.show();
+            
+            // Remove toast element after it's hidden
+            toastElement.addEventListener('hidden.bs.toast', () => {
+                toastElement.remove();
+            });
+        }
+    </script>
+} 

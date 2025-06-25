@@ -1,0 +1,172 @@
+@model IEnumerable<WEB_BanAccGame.Models.GameCategory>
+@{
+    ViewData["Title"] = "Quản lý danh mục";
+}
+
+<div class="container-fluid mt-4">
+    <div class="row mb-4">
+        <div class="col">
+            <h1 class="h2"><i class="bi bi-tags"></i> Quản lý danh mục</h1>
+            <p class="text-muted">Quản lý các thể loại game trong hệ thống</p>
+        </div>
+        <div class="col-auto">
+            <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addCategoryModal">
+                <i class="bi bi-plus-circle"></i> Thêm danh mục mới
+            </button>
+        </div>
+    </div>
+
+    <!-- Success/Error Messages -->
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            <i class="bi bi-check-circle"></i> @TempData["Success"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="bi bi-x-circle"></i> @TempData["Error"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    <!-- Categories Table -->
+    <div class="card border-0 shadow-sm">
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th width="60">ID</th>
+                            <th width="100">Icon</th>
+                            <th>Tên danh mục</th>
+                            <th>Mô tả</th>
+                            <th class="text-center">Số sản phẩm</th>
+                            <th width="150" class="text-center">Thao tác</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var category in Model)
+                        {
+                            <tr>
+                                <td class="align-middle">#@category.Id</td>
+                                <td class="align-middle">
+                                    <span class="display-6">@category.IconUrl</span>
+                                </td>
+                                <td class="align-middle">
+                                    <strong>@category.Name</strong>
+                                </td>
+                                <td class="align-middle">
+                                    @(category.Description ?? "-")
+                                </td>
+                                <td class="align-middle text-center">
+                                    <span class="badge bg-info">@category.GameAccounts.Count</span>
+                                </td>
+                                <td class="align-middle text-center">
+                                    <div class="btn-group btn-group-sm" role="group">
+                                        <button type="button" class="btn btn-outline-primary" 
+                                                data-bs-toggle="modal" data-bs-target="#editCategoryModal@(category.Id)"
+                                                title="Sửa">
+                                            <i class="bi bi-pencil"></i>
+                                        </button>
+                                        @if (category.GameAccounts.Count == 0)
+                                        {
+                                            <form asp-action="DeleteCategory" asp-route-id="@category.Id" method="post" class="d-inline"
+                                                  onsubmit="return confirm('Bạn có chắc muốn xóa danh mục này?');">
+                                                <button type="submit" class="btn btn-outline-danger" title="Xóa">
+                                                    <i class="bi bi-trash"></i>
+                                                </button>
+                                            </form>
+                                        }
+                                        else
+                                        {
+                                            <button type="button" class="btn btn-outline-danger" disabled title="Không thể xóa danh mục có sản phẩm">
+                                                <i class="bi bi-trash"></i>
+                                            </button>
+                                        }
+                                    </div>
+
+                                    <!-- Edit Modal -->
+                                    <div class="modal fade" id="editCategoryModal@(category.Id)" tabindex="-1">
+                                        <div class="modal-dialog">
+                                            <div class="modal-content">
+                                                <form asp-action="EditCategory" method="post">
+                                                    <input type="hidden" name="id" value="@category.Id" />
+                                                    <div class="modal-header">
+                                                        <h5 class="modal-title">Sửa danh mục</h5>
+                                                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                                    </div>
+                                                    <div class="modal-body">
+                                                        <div class="mb-3">
+                                                            <label class="form-label">Tên danh mục</label>
+                                                            <input type="text" name="Name" class="form-control" value="@category.Name" required>
+                                                        </div>
+                                                        <div class="mb-3">
+                                                            <label class="form-label">Mô tả</label>
+                                                            <textarea name="Description" class="form-control" rows="3">@category.Description</textarea>
+                                                        </div>
+                                                        <div class="mb-3">
+                                                            <label class="form-label">Icon (Emoji)</label>
+                                                            <input type="text" name="IconUrl" class="form-control" value="@category.IconUrl" 
+                                                                   placeholder="VD: 🎮">
+                                                        </div>
+                                                    </div>
+                                                    <div class="modal-footer">
+                                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                                                        <button type="submit" class="btn btn-primary">
+                                                            <i class="bi bi-save"></i> Lưu thay đổi
+                                                        </button>
+                                                    </div>
+                                                </form>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Add Category Modal -->
+<div class="modal fade" id="addCategoryModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form asp-action="CreateCategory" method="post">
+                <div class="modal-header">
+                    <h5 class="modal-title">Thêm danh mục mới</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label">Tên danh mục</label>
+                        <input type="text" name="Name" class="form-control" required 
+                               placeholder="VD: Racing, Sports...">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Mô tả</label>
+                        <textarea name="Description" class="form-control" rows="3" 
+                                  placeholder="Mô tả về thể loại game"></textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Icon (Emoji)</label>
+                        <input type="text" name="IconUrl" class="form-control" 
+                               placeholder="VD: 🎮, 🏎️, ⚽...">
+                        <small class="text-muted">Sử dụng emoji để làm icon cho danh mục</small>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-plus-circle"></i> Thêm mới
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div> 

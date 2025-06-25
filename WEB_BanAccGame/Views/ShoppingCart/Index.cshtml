@@ -1,0 +1,244 @@
+@model WEB_BanAccGame.ViewModels.ShoppingCartViewModel
+@{
+    ViewData["Title"] = "Giỏ hàng";
+    var total = Model.ShoppingCartTotal;
+}
+
+<div class="container mt-4">
+    <div class="row mb-4">
+        <div class="col">
+            <h2 class="fw-bold"><i class="bi bi-cart3"></i> Giỏ hàng của bạn</h2>
+            <p class="text-muted">Kiểm tra và quản lý sản phẩm trong giỏ hàng</p>
+        </div>
+    </div>
+
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            <i class="bi bi-check-circle"></i> @TempData["Success"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="bi bi-x-circle"></i> @TempData["Error"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    @if (Model.ShoppingCart.ShoppingCartItems.Any())
+    {
+        <div class="row">
+            <!-- Cart Items -->
+            <div class="col-lg-8">
+                <div class="card border-0 shadow-sm mb-4">
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table align-middle">
+                                <thead>
+                                    <tr>
+                                        <th>Sản phẩm</th>
+                                        <th class="text-center" width="120">Số lượng</th>
+                                        <th class="text-end" width="120">Đơn giá</th>
+                                        <th class="text-end" width="120">Thành tiền</th>
+                                        <th width="50"></th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var item in Model.ShoppingCart.ShoppingCartItems)
+                                    {
+                                        <tr class="cart-item">
+                                            <td>
+                                                <div class="d-flex align-items-center">
+                                                    <img src="@(item.GameAccount?.ImageUrl ?? "https://via.placeholder.com/80x80")" 
+                                                         alt="@item.GameAccount?.Title" 
+                                                         class="img-thumbnail me-3" 
+                                                         style="width: 80px; height: 80px; object-fit: cover;">
+                                                    <div>
+                                                        <h6 class="mb-1">@item.GameAccount?.Title</h6>
+                                                        <small class="text-muted">
+                                                            @item.GameAccount?.Category?.Name
+                                                            @if (item.GameAccount?.Level.HasValue == true)
+                                                            {
+                                                                <span>| Level @item.GameAccount.Level</span>
+                                                            }
+                                                            @if (!string.IsNullOrEmpty(item.GameAccount?.Server))
+                                                            {
+                                                                <span>| @item.GameAccount.Server</span>
+                                                            }
+                                                        </small>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td class="text-center">
+                                                <form asp-action="UpdateQuantity" method="post" class="d-inline-flex align-items-center">
+                                                    <input type="hidden" name="id" value="@item.GameAccount?.Id" />
+                                                    <div class="input-group input-group-sm" style="width: 100px;">
+                                                        <button type="submit" name="quantity" value="@(item.Quantity - 1)" 
+                                                                class="btn btn-outline-secondary @(item.Quantity <= 1 ? "disabled" : "")"
+                                                                @(item.Quantity <= 1 ? "disabled" : "")>
+                                                            <i class="bi bi-dash"></i>
+                                                        </button>
+                                                        <input type="text" class="form-control text-center" value="@item.Quantity" readonly>
+                                                        <button type="submit" name="quantity" value="@(item.Quantity + 1)" 
+                                                                class="btn btn-outline-secondary">
+                                                            <i class="bi bi-plus"></i>
+                                                        </button>
+                                                    </div>
+                                                </form>
+                                            </td>
+                                            <td class="text-end">
+                                                <span class="text-muted">@item.GameAccount?.Price.ToString("N0") ₫</span>
+                                            </td>
+                                            <td class="text-end">
+                                                <strong>@((item.Quantity * (item.GameAccount?.Price ?? 0)).ToString("N0")) ₫</strong>
+                                            </td>
+                                            <td>
+                                                <form asp-action="RemoveFromCart" method="post" class="d-inline"
+                                                      onsubmit="return confirm('Bạn có chắc muốn xóa sản phẩm này?');">
+                                                    <input type="hidden" name="id" value="@item.GameAccount?.Id" />
+                                                    <button type="submit" class="btn btn-sm btn-outline-danger" title="Xóa">
+                                                        <i class="bi bi-trash"></i>
+                                                    </button>
+                                                </form>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Continue Shopping -->
+                <div class="d-flex justify-content-between mb-4">
+                    <a asp-controller="GameAccounts" asp-action="Index" class="btn btn-outline-primary">
+                        <i class="bi bi-arrow-left"></i> Tiếp tục mua sắm
+                    </a>
+                    <form asp-action="ClearCart" method="post" class="d-inline"
+                          onsubmit="return confirm('Bạn có chắc muốn xóa toàn bộ giỏ hàng?');">
+                        <button type="submit" class="btn btn-outline-danger">
+                            <i class="bi bi-trash"></i> Xóa tất cả
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Order Summary -->
+            <div class="col-lg-4">
+                <div class="card border-0 shadow-sm mb-4">
+                    <div class="card-header bg-transparent">
+                        <h5 class="mb-0"><i class="bi bi-receipt-cutoff"></i> Tóm tắt đơn hàng</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between mb-2">
+                            <span>Tạm tính:</span>
+                            <span>@total.ToString("N0") ₫</span>
+                        </div>
+                        <div class="d-flex justify-content-between mb-2">
+                            <span>Giảm giá:</span>
+                            <span class="text-success">-0 ₫</span>
+                        </div>
+                        <hr>
+                        <div class="d-flex justify-content-between mb-4">
+                            <strong>Tổng cộng:</strong>
+                            <strong class="text-primary h4 mb-0">@total.ToString("N0") ₫</strong>
+                        </div>
+
+                        @if (User.Identity?.IsAuthenticated == true)
+                        {
+                            <div class="d-grid">
+                                <a asp-controller="Orders" asp-action="Checkout" class="btn btn-primary btn-lg">
+                                    <i class="bi bi-credit-card"></i> Tiến hành thanh toán
+                                </a>
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="alert alert-info mb-3">
+                                <i class="bi bi-info-circle"></i> Vui lòng đăng nhập để thanh toán
+                            </div>
+                            <div class="d-grid gap-2">
+                                <a asp-area="Identity" asp-page="/Account/Login" asp-route-returnUrl="@Url.Action("Index", "ShoppingCart")" 
+                                   class="btn btn-primary">
+                                    <i class="bi bi-box-arrow-in-right"></i> Đăng nhập
+                                </a>
+                                <a asp-area="Identity" asp-page="/Account/Register" asp-route-returnUrl="@Url.Action("Index", "ShoppingCart")" 
+                                   class="btn btn-outline-primary">
+                                    <i class="bi bi-person-plus"></i> Đăng ký mới
+                                </a>
+                            </div>
+                        }
+                    </div>
+                </div>
+
+                <!-- Promo Code -->
+                <div class="card border-0 shadow-sm mb-4">
+                    <div class="card-body">
+                        <h6 class="mb-3"><i class="bi bi-tag"></i> Mã giảm giá</h6>
+                        <form>
+                            <div class="input-group">
+                                <input type="text" class="form-control" placeholder="Nhập mã giảm giá">
+                                <button class="btn btn-outline-primary" type="submit">Áp dụng</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Security Info -->
+                <div class="card border-0 shadow-sm">
+                    <div class="card-body text-center">
+                        <i class="bi bi-shield-check text-success fs-1"></i>
+                        <h6 class="mt-2">Thanh toán an toàn</h6>
+                        <p class="small text-muted mb-0">
+                            Thông tin thanh toán của bạn được bảo mật tuyệt đối
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Recommended Products -->
+        <div class="mt-5">
+            <h4 class="mb-4">Có thể bạn quan tâm</h4>
+            <div class="row g-4">
+                <!-- You can add recommended products here -->
+            </div>
+        </div>
+    }
+    else
+    {
+        <div class="text-center py-5">
+            <div class="mb-4">
+                <i class="bi bi-cart-x display-1 text-muted"></i>
+            </div>
+            <h3>Giỏ hàng trống</h3>
+            <p class="text-muted mb-4">Bạn chưa có sản phẩm nào trong giỏ hàng</p>
+            <a asp-controller="GameAccounts" asp-action="Index" class="btn btn-primary btn-lg">
+                <i class="bi bi-grid"></i> Khám phá sản phẩm
+            </a>
+        </div>
+
+        <!-- Featured Products for empty cart -->
+        <div class="mt-5">
+            <h4 class="text-center mb-4">Sản phẩm nổi bật</h4>
+            <div class="row g-4">
+                <!-- You can add featured products here -->
+            </div>
+        </div>
+    }
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function() {
+            // Animate cart items on load
+            $('.cart-item').each(function(index) {
+                $(this).css('opacity', '0').delay(index * 100).animate({
+                    opacity: 1
+                }, 500);
+            });
+        });
+    </script>
+} 
